@@ -8,6 +8,8 @@ import {
   View,
 } from 'react-native';
 import { authentication } from './firebase/config';
+import { db } from './firebase/config';
+import { collection, getDocs, addDoc } from 'firebase/firestore/lite';
 
 const App = () => {
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -16,7 +18,7 @@ const App = () => {
   const [userData, setUserData] = useState([]);
 
   useEffect(() => {
-    console.log("issign? = ", isSignedIn, "test ada data = ", userData);
+    // console.log("issign? = ", isSignedIn, "test ada data = ", userData);
   }, [])
 
   const RegisterAccount = () => {
@@ -47,6 +49,27 @@ const App = () => {
   const SignOutAccount = () => {
     setIsSignedIn(false);
   }
+  
+  const AddData = async () => {
+        try {
+      const docRef = await addDoc(collection(db, "posts"), {
+        first: "Ada",
+        last: "Lovelace",
+        born: 1815
+      });
+      console.log("Document written with ID: ", docRef.id);
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
+  }
+
+  const PostData = async () => {
+    // Get a list of cities from your database
+    const citiesCol = collection(db, 'posts');
+    const citySnapshot = await getDocs(citiesCol);
+    const cityList = citySnapshot.docs.map(doc => doc.data());
+    console.log(cityList);
+  }
 
   return (
     <View>
@@ -60,6 +83,8 @@ const App = () => {
         ) : (
           <>
           <Text>Hello, {userData.email}. You're logged in</Text>
+      <Button title='Post Data!' onPress={PostData}></Button>
+      <Button title='Add Data!' onPress={AddData}></Button>
       <Button title='Sign Out' onPress={SignOutAccount}></Button>
           </>
         )}
